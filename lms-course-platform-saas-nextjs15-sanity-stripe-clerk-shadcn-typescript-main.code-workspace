@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"name": "lms-course-platform-saas-nextjs15-sanity-stripe-clerk-shadcn-typescript-main",
+			"path": "."
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "node_modules/typescript/lib"
+	}
+}
