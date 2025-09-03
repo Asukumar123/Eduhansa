@@ -1,46 +1,32 @@
-import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
-import getCourseById from "@/sanity/lib/courses/getCourseById";
-import { Sidebar } from "@/components/dashboard/Sidebar";
-import { getCourseProgress } from "@/sanity/lib/lessons/getCourseProgress";
-import { checkCourseAccess } from "@/lib/auth";
+import type { Metadata } from "next";
+import { ThemeProvider } from "@/components/theme-provider";
+import { SanityLive } from "@/sanity/lib/live";
+import { SidebarProvider } from "@/components/providers/sidebar-provider";
+import { AuthGuard } from "@/components/auth/AuthGuard";
 
-interface CourseLayoutProps {
-  children: React.ReactNode;
-  params: Promise<{
-    courseId: string;
-  }>;
-}
+export const metadata: Metadata = {
+  title: "Dashboard - EduHansa",
+  description: "Student dashboard for course management",
+};
 
-export default async function CourseLayout({
+export default function DashboardLayout({
   children,
-  params,
-}: CourseLayoutProps) {
-  const user = await currentUser();
-  const { courseId } = await params;
-
-  if (!user?.id) {
-    return redirect("/");
-  }
-
-  const authResult = await checkCourseAccess(user?.id || null, courseId);
-  if (!authResult.isAuthorized || !user?.id) {
-    return redirect(authResult.redirect!);
-  }
-
-  const [course, progress] = await Promise.all([
-    getCourseById(courseId),
-    getCourseProgress(user.id, courseId),
-  ]);
-
-  if (!course) {
-    return redirect("/my-courses");
-  }
-
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="h-full">
-      <Sidebar course={course} completedLessons={progress.completedLessons} />
-      <main className="h-full lg:pt-[64px] pl-20 lg:pl-96">{children}</main>
-    </div>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange
+    >
+      <AuthGuard>
+        <SidebarProvider>
+          <div className="h-full">{children}</div>
+        </SidebarProvider>
+      </AuthGuard>
+      <SanityLive />
+    </ThemeProvider>
   );
 }

@@ -12,10 +12,14 @@ import {
   enrollmentType,
   lessonCompletionType,
   blogType,
+  paymentTransactionType, // NEW
+  userSessionType,        // NEW (optional)
+  migrationLogType,       // NEW (for tracking migrations)
 } from "./schemaTypes";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
+    // Existing types
     categoryType,
     questionType,
     testSeriesType,
@@ -24,9 +28,16 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     moduleType,
     lessonType,
     instructorType,
+    blogType,
+
+    // Updated types
     studentType,
     enrollmentType,
     lessonCompletionType,
-    blogType,
+
+    // New types for Firebase/Razorpay & migration
+    paymentTransactionType,
+    userSessionType, // optional
+    migrationLogType,
   ],
 };

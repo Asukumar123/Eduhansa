@@ -1,9 +1,8 @@
-import Image from "next/image";
 import { defineField, defineType } from "sanity";
 
 export const enrollmentType = defineType({
   name: "enrollment",
-  title: "Enrollment",
+  title: "Course Enrollment",
   type: "document",
   fields: [
     defineField({
@@ -11,55 +10,140 @@ export const enrollmentType = defineType({
       title: "Student",
       type: "reference",
       to: [{ type: "student" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "course",
       title: "Course",
       type: "reference",
       to: [{ type: "course" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
+    }),
+    // CHANGE: Update payment fields for Razorpay
+    defineField({
+      name: "paymentProvider",
+      title: "Payment Provider",
+      type: "string",
+      options: {
+        list: [
+          { title: "Razorpay", value: "razorpay" },
+          { title: "Free", value: "free" },
+        ],
+      },
+      initialValue: "razorpay",
     }),
     defineField({
-      name: "amount",
-      title: "Amount",
-      type: "number",
-      validation: (rule) => rule.required().min(0),
-      description: "The amount paid for the course enrollment in cents",
+      name: "razorpayOrderId",
+      title: "Razorpay Order ID",
+      type: "string",
+      description: "Razorpay order ID (replaces Stripe session ID)",
+    }),
+    defineField({
+      name: "razorpayPaymentId",
+      title: "Razorpay Payment ID",
+      type: "string",
+      description: "Razorpay payment ID for successful payments",
     }),
     defineField({
       name: "paymentId",
       title: "Payment ID",
       type: "string",
-      validation: (rule) => rule.required(),
-      description: "The Stripe payment/checkout session ID",
+      description: "Generic payment ID (for backward compatibility)",
+    }),
+    // REMOVE: Stripe-specific fields
+    // defineField({
+    //   name: "stripeSessionId", // DELETE THIS FIELD
+    //   title: "Stripe Session ID",
+    //   type: "string",
+    // }),
+    
+    defineField({
+      name: "amount",
+      title: "Amount Paid",
+      type: "number",
+      validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
+      name: "currency",
+      title: "Currency",
+      type: "string",
+      initialValue: "INR",
+      options: {
+        list: [
+          { title: "Indian Rupee", value: "INR" },
+          { title: "US Dollar", value: "USD" },
+        ],
+      },
+    }),
+    defineField({
+      name: "paymentStatus",
+      title: "Payment Status",
+      type: "string",
+      options: {
+        list: [
+          { title: "Pending", value: "pending" },
+          { title: "Completed", value: "completed" },
+          { title: "Failed", value: "failed" },
+          { title: "Refunded", value: "refunded" },
+          { title: "Free", value: "free" },
+        ],
+      },
+      initialValue: "pending",
     }),
     defineField({
       name: "enrolledAt",
       title: "Enrolled At",
       type: "datetime",
+      validation: (Rule) => Rule.required(),
       initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: "expiresAt",
+      title: "Access Expires At",
+      type: "datetime",
+      description: "Leave empty for lifetime access",
+    }),
+    defineField({
+      name: "metadata",
+      title: "Additional Metadata",
+      type: "object",
+      fields: [
+        {
+          name: "enrollmentSource",
+          title: "Enrollment Source",
+          type: "string",
+          options: {
+            list: [
+              { title: "Website", value: "website" },
+              { title: "Mobile App", value: "mobile" },
+              { title: "Promotion", value: "promotion" },
+            ],
+          },
+        },
+        {
+          name: "discountApplied",
+          title: "Discount Applied",
+          type: "number",
+        },
+        {
+          name: "couponCode",
+          title: "Coupon Code Used",
+          type: "string",
+        },
+      ],
     }),
   ],
   preview: {
     select: {
+      studentName: "student.displayName",
       courseTitle: "course.title",
-      studentFirstName: "student.firstName",
-      studentLastName: "student.lastName",
-      studentImage: "student.imageUrl",
+      amount: "amount",
+      status: "paymentStatus",
     },
-    prepare({ courseTitle, studentFirstName, studentLastName, studentImage }) {
+    prepare({ studentName, courseTitle, amount, status }) {
       return {
-        title: `${studentFirstName} ${studentLastName}`,
-        subtitle: courseTitle,
-        media: (
-          <Image
-            src={studentImage}
-            alt={`${studentFirstName} ${studentLastName}`}
-            width={100}
-            height={100}
-          />
-        ),
+        title: `${studentName} → ${courseTitle}`,
+        subtitle: `₹${amount} (${status})`,
       };
     },
   },

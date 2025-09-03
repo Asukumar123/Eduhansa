@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { defineField, defineType } from "sanity";
 
 export const studentType = defineType({
@@ -6,6 +5,33 @@ export const studentType = defineType({
   title: "Student",
   type: "document",
   fields: [
+    // CHANGE: Replace clerkId with firebaseUid
+    defineField({
+      name: "firebaseUid",
+      title: "Firebase UID",
+      type: "string",
+      validation: (Rule) => Rule.required(),
+      description: "Firebase User ID (replaces Clerk ID)",
+    }),
+    // REMOVE: clerkId field (if it exists)
+    // defineField({
+    //   name: "clerkId", // DELETE THIS FIELD
+    //   title: "Clerk ID",
+    //   type: "string",
+    // }),
+    
+    defineField({
+      name: "email",
+      title: "Email",
+      type: "string",
+      validation: (Rule) => Rule.required().email(),
+    }),
+    defineField({
+      name: "displayName",
+      title: "Display Name",
+      type: "string",
+      validation: (Rule) => Rule.required(),
+    }),
     defineField({
       name: "firstName",
       title: "First Name",
@@ -17,41 +43,82 @@ export const studentType = defineType({
       type: "string",
     }),
     defineField({
-      name: "email",
-      title: "Email",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "clerkId",
-      title: "Clerk User ID",
-      type: "string",
-      validation: (rule) => rule.required(),
-    }),
-    defineField({
-      name: "imageUrl",
-      title: "Profile Image URL",
+      name: "photoURL",
+      title: "Profile Photo URL",
       type: "url",
+      description: "Firebase user photo URL",
+    }),
+    defineField({
+      name: "phoneNumber",
+      title: "Phone Number",
+      type: "string",
+    }),
+    defineField({
+      name: "dateOfBirth",
+      title: "Date of Birth",
+      type: "date",
+    }),
+    defineField({
+      name: "createdAt",
+      title: "Created At",
+      type: "datetime",
+      initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: "lastLoginAt",
+      title: "Last Login",
+      type: "datetime",
+    }),
+    defineField({
+      name: "isEmailVerified",
+      title: "Email Verified",
+      type: "boolean",
+      initialValue: false,
+    }),
+    defineField({
+      name: "preferences",
+      title: "User Preferences",
+      type: "object",
+      fields: [
+        {
+          name: "language",
+          title: "Preferred Language",
+          type: "string",
+          options: {
+            list: [
+              { title: "English", value: "en" },
+              { title: "Hindi", value: "hi" },
+            ],
+          },
+          initialValue: "en",
+        },
+        {
+          name: "notifications",
+          title: "Email Notifications",
+          type: "boolean",
+          initialValue: true,
+        },
+        {
+          name: "theme",
+          title: "Theme Preference",
+          type: "string",
+          options: {
+            list: [
+              { title: "Light", value: "light" },
+              { title: "Dark", value: "dark" },
+              { title: "System", value: "system" },
+            ],
+          },
+          initialValue: "system",
+        },
+      ],
     }),
   ],
   preview: {
     select: {
-      firstName: "firstName",
-      lastName: "lastName",
-      imageUrl: "imageUrl",
-    },
-    prepare({ firstName, lastName, imageUrl }) {
-      return {
-        title: `${firstName.charAt(0).toUpperCase()}${firstName.slice(1)} ${lastName.charAt(0).toUpperCase()}${lastName.slice(1)}`,
-        media: (
-          <Image
-            src={imageUrl}
-            alt={`${firstName} ${lastName}`}
-            width={100}
-            height={100}
-          />
-        ),
-      };
+      title: "displayName",
+      subtitle: "email",
+      media: "photoURL",
     },
   },
 });

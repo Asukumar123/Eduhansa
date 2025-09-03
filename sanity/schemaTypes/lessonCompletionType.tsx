@@ -1,6 +1,4 @@
-import Image from "next/image";
 import { defineField, defineType } from "sanity";
-import { urlFor } from "../lib/image";
 
 export const lessonCompletionType = defineType({
   name: "lessonCompletion",
@@ -12,55 +10,66 @@ export const lessonCompletionType = defineType({
       title: "Student",
       type: "reference",
       to: [{ type: "student" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "lesson",
       title: "Lesson",
       type: "reference",
       to: [{ type: "lesson" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "module",
       title: "Module",
       type: "reference",
       to: [{ type: "module" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "course",
       title: "Course",
       type: "reference",
       to: [{ type: "course" }],
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "completedAt",
       title: "Completed At",
       type: "datetime",
-      validation: (rule) => rule.required(),
+      validation: (Rule) => Rule.required(),
+      initialValue: () => new Date().toISOString(),
+    }),
+    defineField({
+      name: "timeSpent",
+      title: "Time Spent (minutes)",
+      type: "number",
+      description: "Time spent on this lesson in minutes",
+    }),
+    defineField({
+      name: "watchTime",
+      title: "Video Watch Time (seconds)",
+      type: "number",
+      description: "Total video watch time in seconds",
+    }),
+    defineField({
+      name: "completionPercentage",
+      title: "Completion Percentage",
+      type: "number",
+      validation: (Rule) => Rule.min(0).max(100),
+      initialValue: 100,
     }),
   ],
   preview: {
     select: {
-      courseTitle: "course.title",
+      studentName: "student.displayName",
       lessonTitle: "lesson.title",
       completedAt: "completedAt",
-      courseImage: "course.image",
     },
-    prepare({ courseTitle, lessonTitle, completedAt, courseImage }) {
+    prepare({ studentName, lessonTitle, completedAt }) {
       return {
-        title: `${courseTitle || "Course"}: "${lessonTitle || "Lesson"}"`,
-        subtitle: completedAt ? new Date(completedAt).toLocaleDateString() : "",
-        media: (
-          <Image
-            src={urlFor(courseImage).url()}
-            alt={courseTitle}
-            width={100}
-            height={100}
-          />
-        ),
+        title: `${studentName} completed ${lessonTitle}`,
+        subtitle: new Date(completedAt).toLocaleDateString(),
       };
     },
   },

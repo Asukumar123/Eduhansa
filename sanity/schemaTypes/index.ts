@@ -38,5 +38,8 @@ export * from "./enrollmentType";
 export * from "./lessonCompletionType";
 export * from "./blogType";
 export * from "./category";
+export * from "./paymentTransactionType"
+export * from "./userSessionType"
+export * from "./migrationLogType"
 
 

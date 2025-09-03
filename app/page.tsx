@@ -1,12 +1,12 @@
 "use client"
 
-
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import {
   Check,
- 
+
   ArrowRight,
   Star,
   BookOpen,
@@ -25,13 +25,32 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-
-// import Header from "@/components/Header"
+import { useTheme } from "next-themes"
+import Header from "@/components/Header"
 
 export default function LandingPage() {
+  const [isScrolled, setIsScrolled] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
 
+  useEffect(() => {
+    setMounted(true)
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true)
+      } else {
+        setIsScrolled(false)
+      }
+    }
 
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }
 
   const container = {
     hidden: { opacity: 0 },
@@ -89,7 +108,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex min-h-[100dvh] flex-col">
-
+     <Header />
       <main className="flex-1">
         {/* Hero Section */}
       <section className="w-full py-20 md:py-32 lg:py-40 overflow-hidden relative">
